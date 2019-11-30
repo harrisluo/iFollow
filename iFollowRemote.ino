@@ -1,4 +1,5 @@
 #define BLYNK_USE_DIRECT_CONNECT
+
 //LEFT SIDE MOTORS
 #define L_ENA 3
 #define L_IN1 2
@@ -17,11 +18,15 @@
 #define BACKWARD 5
 
 //ULTRASONIC PINS
-#define TRIG_PIN1 8
-#define ECHO_PIN1 9
+#define TRIG_PIN 8
+#define ECHO_PIN_LEFT 9
+#define ECHO_PIN_MID 12
+#define ECHO_PIN_RIGHT 13
+#define MAX_DIST 200
 
 #include <SoftwareSerial.h>
 #include <BlynkSimpleSerialBLE.h>
+#include <NewPing.h>
 #define BLUETOOTH_TX_PIN 10
 #define BLUETOOTH_RX_PIN 11
 
@@ -32,6 +37,11 @@ int switch4;
 int driveDirection = STOP;
 int driveSpeed = 100;
 char auth[] ="3cIMzOvMabyrD2jCGUfv_q-MrHU-ydPM";
+
+// Ultrasonic components
+NewPing sensor_L(TRIG_PIN, ECHO_PIN_LEFT, MAX_DIST);
+NewPing sensor_M(TRIG_PIN, ECHO_PIN_MID, MAX_DIST);
+NewPing sensor_R(TRIG_PIN, ECHO_PIN_RIGHT, MAX_DIST);
 
 // Serial components
 SoftwareSerial bluetoothSerial(BLUETOOTH_TX_PIN, BLUETOOTH_RX_PIN);
@@ -183,6 +193,35 @@ float ultrasonicDist() {
   distance = (duration / 2) * 0.0343;
   Serial.println(distance);
   return distance;
+}
+
+void ultrasonicScan() {
+  int distance;
+  Serial.flush();
+  
+  delay(50);      //Much shorter than this and there is a risk pings will overlap
+  distance = sensor_L.ping() / US_ROUNDTRIP_CM;
+  if(distance < 15 && distance != 0) {
+    Serial.print("XXXX ");
+  } else {
+    Serial.printf("____ ");
+  }
+
+  delay(50);
+  distance = sensor_M.ping() / US_ROUNDTRIP_CM;
+  if(distance < 15 && distance != 0) {
+    Serial.print("XXXX ");
+  } else {
+    Serial.printf("____ ");
+  }
+
+  delay(50);
+  distance = sensor_R.ping() / US_ROUNDTRIP_CM;
+  if(distance < 15 && distance != 0) {
+    Serial.print("XXXX\n");
+  } else {
+    Serial.printf("____\n");
+  }
 }
 
 BLYNK_WRITE(V1) {
