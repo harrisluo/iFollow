@@ -34,7 +34,7 @@ GeoLoc checkGPS() {
       newdata = true;
   }
   if (newdata) {
-    return gpsdump(gps);
+    return gpsdump(gps); // comment
   }
 
   GeoLoc cartLoc;
